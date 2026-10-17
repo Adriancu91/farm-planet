@@ -11,6 +11,7 @@ Toate modelele și texturile folosite sunt **CC0 (domeniu public)** — gratuite
 | Copaci, flori, iarbă, pietre, ciuperci | Quaternius — Stylized Nature MegaKit | https://opengameart.org/content/stylized-nature-megakit |
 | Case, hambar, garduri, căruță, lăzi | Quaternius — Medieval Village MegaKit | https://opengameart.org/content/medieval-village-megakit |
 | Legume, nuferi, buștean | Kenney — Nature Kit | https://opengameart.org/content/nature-kit |
+| Dragon, Slimy, Liliac (companioni) | Quaternius — LowPoly Animated Monsters | https://opengameart.org/content/lowpoly-animated-monsters |
 | Tractor, mașină safari | Kenney — Car Kit | https://opengameart.org/content/car-kit |
 | Texturi de sol (iarbă, pământ, piatră, zăpadă) | Poly Haven | https://polyhaven.com |
 

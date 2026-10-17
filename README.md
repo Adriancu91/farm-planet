@@ -1,19 +1,25 @@
 # 🌍 Farm Planet
 
 Jocul Mariei — o fermă 3D în browser, jucată pe telefon **pe orizontală**.
+Joacă aici: https://adriancu91.github.io/farm-planet/
 
-## Cum se joacă
-- 🕹️ **Joystick** în stânga jos pentru mers, butonul **Sari** în dreapta. Tragi cu degetul pe ecran ca să rotești camera.
-- 🌱 Plantezi legume pe parcele (morcov, grâu, roșie, porumb, dovleac), aștepți să crească și **recoltezi**.
-- 💰 Vinzi totul la **Piață** și cumperi din 🛒: parcele, clădiri (hambar, seră, moară, fântână, siloz, flori, felinare), unelte, țarcuri, **tractor** și **mașină safari**.
-- 🥚 Găsești **ouă misterioase** în pădure și la munte (luminițele). La **Cuibul magic**: 60% animal, 40% ou gol. Ouăle de aur (mai ales la munte) aduc animale rare.
-- 🐾 10 animale animate de colecționat: găină, cocoș, purceluș, oiță, cățel, văcuță, căluț, lamă, zebră și unicorn — fiecare dă un produs pe care îl vinzi.
-- 🤝 Pe hartă sunt fermele prietenilor (boți): **Ana, Luca, Sofia**. Îi ajuți la udat și la fiecare 3 ajutoare primești un ou cadou.
-- 👗 6 personaje anime 3D (Lili fermiera, Hana, Mei, Kai, Prințesa Roza, Eroina Aqua) cu păr și haine care se mișcă, clipesc și zâmbesc; 7 accesorii (pălării, coroniță, tiară, urechi de pisică, căciulă) și nuanțe de păr.
+## Ce poți face
+- 🕹️ **Joystick** stânga, **Sari** dreapta, trage pe ecran ca să rotești camera.
+- 🌱 **8 legume** (morcov, grâu, salată, nap, porumb, trestie, pepene, dovleac) pe până la **64 de parcele** în 4 câmpuri.
+- ⭐ **Niveluri** — câștigi experiență din tot ce faci; fiecare nivel deblochează lucruri noi și dă un cadou.
+- 🏭 **6 fabrici**: furaje, brutărie, lăptărie, zahăr, țesătorie, cofetărie — transformă recolta în produse scumpe.
+- 📋 **Comenzi** de la vecini pentru monede și ⭐.
+- 🌳 **Pomi fructiferi** (măr, cireș, păr, portocal) și 🎣 **pescuit** la 3 lacuri.
+- 🥚 **Ouă misterioase** în natură → 60% animal / 40% gol; 10 animale animate. Ouăle de aur pot avea un **pui de dragon**.
+- 🥣 Hrănește animalele cu furaje ca să producă de 2× mai repede.
+- 🐉 **Companioni** care te urmăresc și te ajută: cățel, Slimy, liliac, 5 dragoni (roșu, verde, albastru, roz, de aur).
+- 🏗️ **Mod aranjare** — muți și rotești casa, piața, câmpurile, țarcurile, fabricile, pomii și decorurile.
+- 🌍 **Extinderea fermei** pe 4 niveluri (mai mult loc, câmpuri și până la 10 țarcuri) + hartă mare cu 5 ferme de prieteni.
+- ⬆️ **Îmbunătățiri**: hambar mai mare, stropitoare, pușculiță, linii de producție, hrană pentru companion.
+- 🐖 **Pușculița** face bani singură; la revenire primești rezumatul a ce s-a întâmplat cât ai lipsit + **cadoul zilei**.
+- 👗 **Cabina de probă**: 6 personaje anime, 9 culori de haine, părul oricărui personaj, 10 culori de păr, 11 accesorii pe cap, ochelari, aripi/rucsac/mantie.
 
-Progresul se salvează automat în telefon (localStorage).
+Progresul se salvează automat în telefon.
 
-## Pornire
-`index.html` + folderul `assets/` (modele 3D, texturi). Three.js și three-vrm vin din CDN. Jocul e publicat pe GitHub Pages: https://adriancu91.github.io/farm-planet/
-
-Grafica folosește doar resurse gratuite CC0 — vezi `CREDITS.md`.
+## Fișiere
+`index.html` (interfața), `js/game.js` (jocul), `js/data.js` (prețuri, rețete, niveluri — ușor de modificat), `assets/` (modele 3D CC0, vezi `CREDITS.md`).
