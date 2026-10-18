@@ -708,16 +708,21 @@ FRIENDS.forEach((f,fi)=>{
 /* ================= WORKER BOTS ================= */
 const BOT_CLIPS={};for(const a of UAL.animations)BOT_CLIPS[a.name]=a;
 const bots={};
-function makeBot(id){const W=WORKERS[id];const obj=skClone(UAL.scene);obj.scale.setScalar(.82);
+function makeBot(id,num=0){const W=WORKERS[id];const obj=skClone(UAL.scene);obj.scale.setScalar(.82);
   obj.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const ms=matsOf(o).map(m=>{const n=m.clone();if(m.name==='M_Main'){n.color.setHex(W.col);n.roughness=.4;n.metalness=.25;}else{n.color.setHex(0xf2f2f2);n.metalness=.6;n.roughness=.3;}return n;});o.material=ms.length>1?ms:ms[0];}});
   const g=new THREE.Group();g.add(obj);const head=obj.getObjectByName(THREE.PropertyBinding.sanitizeNodeName('DEF-head'));
   if(head){const hat=makeHeadAcc(id==='vanzator'?'sapca':id==='fabricant'?'caciula':id==='gradinar'?'flori':'paie');hat.scale.setScalar(1.25/.82);hat.position.set(0,.22,0);head.add(hat);}
-  const lbl=textSprite('🤖 '+W.n.replace('Bot ',''),{size:.6,bg:'rgba(255,255,255,.9)'});lbl.position.y=1.85;g.add(lbl);
+  const lbl=textSprite('🤖 '+W.n.replace('Bot ','')+(num?' '+(num+1):''),{size:.6,bg:'rgba(255,255,255,.9)'});lbl.position.y=1.85;g.add(lbl);
   const mixer=new THREE.AnimationMixer(obj);const acts={};for(const n of ['Idle_Loop','Walk_Loop','PickUp_Table','Interact']){if(!BOT_CLIPS[n])continue;const a=mixer.clipAction(BOT_CLIPS[n]);if(n==='PickUp_Table'||n==='Interact'){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}acts[n]=a;}
-  const b={id,g,mixer,acts,cur:null,pos:new THREE.Vector3(),job:null,t:rand(0,2),rot:0,lock:0};
+  const b={id,type:id,g,mixer,acts,cur:null,pos:new THREE.Vector3(),job:null,t:rand(0,2),rot:0,lock:0};
   const home=PL.casa;b.pos.set(home.x+rand(-3,3),0,home.z+6+rand(-1,1));g.position.copy(b.pos);scene.add(g);botPlay(b,'Idle_Loop');return b;}
 function botPlay(b,n,fade=.25){if(b.cur===n)return;const a=b.acts[n],p=b.acts[b.cur];if(!a)return;a.reset().fadeIn(fade).play();if(p)p.fadeOut(fade);b.cur=n;}
-for(const id in WORKERS)if(S.work[id])bots[id]=makeBot(id);
+for(const id in S.work)if(!S.work[id].n)S.work[id].n=1;
+const workN=id=>S.work[id]?S.work[id].n||1:0;
+const workMax=()=>Math.min(10,2+2*S.farmLv);
+const hireCost=id=>Math.round(WORKERS[id].cost*(1+.6*workN(id)));
+function syncBots(){for(const id in WORKERS)for(let k=0;k<workN(id);k++){const key=id+'#'+k;if(!bots[key])bots[key]=makeBot(id,k);}}
+syncBots();
 const workActive=id=>S.work[id]&&S.work[id].on&&S.coins>0;
 
 /* ================= INPUT ================= */
@@ -838,9 +843,11 @@ function openShop(tab){shopTab=tab;const T_={parcele:'🌱 Câmp',cladiri:'🏠 
     h+='<h3>Semințe (le plătești când plantezi)</h3>'+Object.values(CROPS).map(c=>`<div class="item"><div class="em">${c.e}</div><div class="info"><b>${c.n}</b><small>${lockedLv(c.lv)?`🔒 de la nivelul ${c.lv} · `:''}Sămânță ${c.cost}🪙 · crește ${c.t}s · vinzi ${c.v}🪙/buc</small></div></div>`).join('');}
   if(tab==='cladiri')h+=Object.entries(BUILD).map(([k,b])=>itemRow(b.e,b.n,b.d2,lvBtn(b.lv,S.own[k],b.cost),'b:'+k,S.own[k]||lockedLv(b.lv)||S.coins<b.cost)).join('');
   if(tab==='fabrici')h+='<p>Fabricile transformă ce crești în produse scumpe.</p>'+Object.entries(FACTORIES).map(([k,f])=>itemRow(f.e,f.n,f.rec.map(r=>itemInfo(r.out).e+' '+itemInfo(r.out).n).join(', '),lvBtn(f.lv,S.own['f_'+k],f.cost),'f:'+k,S.own['f_'+k]||lockedLv(f.lv)||S.coins<f.cost)).join('');
-  if(tab==='muncitori'){const wage=Object.entries(S.work).filter(([,w])=>w.on).reduce((s,[k])=>s+WORKERS[k].wage,0);
+  if(tab==='muncitori'){const wage=wagesPerMin();
     h+=`<p>Boții lucrează singuri pe fermă, chiar și când nu joci. Primesc <b>salariu pe minut</b> cât timp sunt porniți (acum: <b>${wage} 🪙/min</b>). Îi poți opri oricând.</p>`;
-    h+=Object.entries(WORKERS).map(([k,w])=>{const own=S.work[k];return `<div class="item"><div class="em">🤖</div><div class="info"><b>${w.n}</b><small>${w.d} · salariu ${w.wage} 🪙/min</small></div>${own?`<button class="buy" data-wk="${k}" style="background:${own.on?'#ff6b6b':'#43b047'}">${own.on?'⏸ Oprește':'▶ Pornește'}</button>`:`<button class="buy" data-buy="w:${k}" ${lockedLv(w.lv)||S.coins<w.cost?'disabled':''}>${lockedLv(w.lv)?'🔒 Nivel '+w.lv:'Angajează '+w.cost+' 🪙'}</button>`}</div>`;}).join('');}
+    h+=`<p>Poți avea până la <b>${workMax()}</b> boți din fiecare fel — extinde ferma 🌍 ca să angajezi mai mulți.</p>`;
+    h+=Object.entries(WORKERS).map(([k,w])=>{const own=S.work[k];const n=workN(k);const c=hireCost(k);const canHire=!lockedLv(w.lv)&&n<workMax()&&S.coins>=c;
+      return `<div class="item"><div class="em">🤖</div><div class="info"><b>${w.n}${n?` × ${n}`:''}</b><small>${w.d} · salariu ${w.wage} 🪙/min fiecare</small></div>${own?`<button class="buy" data-wk="${k}" style="background:${own.on?'#ff6b6b':'#43b047'}">${own.on?'⏸ Oprește':'▶ Pornește'}</button>`:''}<button class="buy" data-buy="w:${k}" ${canHire?'':'disabled'}>${lockedLv(w.lv)?'🔒 Nivel '+w.lv:n>=workMax()?'MAX':(n?'+1 · ':'Angajează ')+fmt(c)+' 🪙'}</button></div>`;}).join('');}
   if(tab==='pomi')h+='<p>Pomii fac fructe iar și iar. Îi muți unde vrei cu 🏗️.</p>'+Object.entries(TREES).map(([k,t])=>itemRow(t.e,'Pom: '+t.n,`Fructe la ${t.t}s · ${t.v}🪙 bucata`,lockedLv(t.lv)?`🔒 Nivel ${t.lv}`:t.cost+' 🪙','t:'+k,lockedLv(t.lv)||S.coins<t.cost)).join('');
   if(tab==='decor')h+='<p>Decorațiuni pe care le aranjezi cum vrei (🏗️).</p>'+Object.entries(DECOR).map(([k,d])=>itemRow(d.e,d.n,`Ai ${S.decor.filter(x=>x.id===k).length}`,lockedLv(d.lv)?`🔒 Nivel ${d.lv}`:d.cost+' 🪙','d:'+k,lockedLv(d.lv)||S.coins<d.cost)).join('');
   if(tab==='animale'){const maxP=FARM_LEVELS[S.farmLv].pens;h+=`<p>Ai ${S.pens}/${maxP} țarcuri, câte ${penCap()} animale fiecare (${S.animals.length}/${capacity()}). Extinde ferma pentru mai multe țarcuri și mărește-le din Îmbunătățiri.</p>`;
@@ -866,7 +873,7 @@ function buy(what,fromWorld){
   else if(k==='t2'){const t=TOOLS[id];if(S.own[id]||lockedLv(t.lv)||!pay(t.cost))return;S.own[id]=true;toast(t.e+' '+t.n+' — cumpărat!');}
   else if(k==='v'){const v=VEH[id];if(S.own[id]||lockedLv(v.lv)||!pay(v.cost))return;S.own[id]=true;spawnVehicle(id);toast(v.e+' '+v.n+' — e al tău!');addXP(10);}
   else if(k==='p'){const p=PETS[id];if(S.pets[id]||lockedLv(p.lv)||!pay(p.cost))return;S.pets[id]=true;setPet(id,true);toast(p.e+' '+p.n+' e acum companionul tău!');addXP(10);}
-  else if(k==='w'){const w=WORKERS[id];if(S.work[id]||lockedLv(w.lv)||!pay(w.cost))return;S.work[id]={on:true};bots[id]=makeBot(id);toast('🤖 '+w.n+' a început lucrul!');addXP(10);}
+  else if(k==='w'){const w=WORKERS[id];if(lockedLv(w.lv)||workN(id)>=workMax()||!pay(hireCost(id)))return;if(S.work[id])S.work[id].n=workN(id)+1;else S.work[id]={on:true,n:1};S.work[id].on=true;syncBots();toast(`🤖 ${w.n} × ${workN(id)} — la treabă!`);addXP(10);}
   else if(k==='u'){const u=UPGRADES[id];const l=S.up[id];if(l>=u.max)return;if(u.need&&!S.own[u.need])return;const c=u.cost(l+(u.need?0:1));if(!pay(c))return;S.up[id]++;if(id==='sera')refreshGH();if(id==='tarcCap')placeAnimals();toast(u.e+' '+u.n+' — nivel '+S.up[id]);addXP(5);}
   refreshLocks();save();hud();if(!fromWorld&&modalOn&&!lookOpen)openShop(shopTab);}
 function setPet(id,silent){S.pet=id;spawnPet();save();if(!silent&&modalOn)openShop('comp');}
@@ -1111,23 +1118,29 @@ function toggleVehicle(){if(arrange.on)return;if(player.veh)return dismount();co
 
 /* ================= WORKER LOGIC ================= */
 // a job = {x,z,anim,dur,run()}; bots walk there, offline catch-up runs it directly
+const RES=new Set();const free=k=>!RES.has(k);
 function findJob(id){
-  if(id==='culegator'){for(let i=0;i<S.unl;i++){const p=S.plots[i];if(p.c&&p.p>=1&&invTotal()+6<=invCap()){const [x,z]=plotPos(i);return {x,z:z+1.4,anim:'PickUp_Table',dur:1.4,run:()=>{const c=p.c;const n=harvestPlot(i,true);if(n>0)plantPlot(i,CROPS[c].lv<=S.lv?c:'morcov');return n>0;}};}}
-    for(let i=0;i<S.unl;i++){const p=S.plots[i];if(!p.c&&p.last&&S.coins>=CROPS[p.last].cost){const [x,z]=plotPos(i);return {x,z:z+1.4,anim:'PickUp_Table',dur:1.2,run:()=>plantPlot(i,p.last)};}}}
-  if(id==='ingrijitor'){for(const o of animalObjs){if(o.a.rd&&invTotal()+5<=invCap())return {x:o.m.g.position.x+.8,z:o.m.g.position.z+.8,anim:'Interact',dur:1.1,run:()=>collectAnimal(o,true)>0};}
-    if(S.inv.hrana)for(let i=0;i<S.pens;i++)if(animalObjs.some(o=>o.pen===i&&!o.a.fed)){const [x,z]=penPos(i);return {x:x+4.4,z,anim:'Interact',dur:1.1,run:()=>feedPen(i)>0};}}
-  if(id==='vanzator'){const need=orderNeeds();const sellable=Object.entries(S.inv).reduce((s,[k,n])=>s+(k==='hrana'?0:Math.max(0,n-(need[k]||0))),0);if(sellable>0&&(invTotal()>invCap()*.3||sellable>=15))return {x:market.x,z:market.z+2.8,anim:'Interact',dur:1.4,run:()=>{const s=marketSell(true);if(s)toastQuiet(`🤖 Vânzătorul a vândut marfă: +${fmt(s)} 🪙`);return s>0;}};}
-  if(id==='fabricant'){for(const fid in FACTORIES){const st=S.fac[fid];const o=PL['f:'+fid];if(!st||!o)continue;const canStart=st.last!==undefined&&st.q.length<slots()&&have(FACTORIES[fid].rec[st.last].need);
-      if((st.done.length&&invTotal()+st.done.length<=invCap())||canStart)return {x:o.x,z:o.z+fpSize(o)[1]+.8,anim:'Interact',dur:1.2,run:()=>{let ok=collectFactory(fid,true)>0;while(st.last!==undefined&&startRecipe(fid,st.last))ok=true;return ok;}};}}
-  if(id==='gradinar'){for(const k in S.trees){const tr=S.trees[k];const o=PL[k];if(o&&tr.p>=1&&invTotal()+3<=invCap())return {x:o.x,z:o.z+1.9,anim:'PickUp_Table',dur:1.3,run:()=>{addInv(tr.t,3);tr.p=0;S.st.harv++;return true;}};}
-    const gh=PL['b:sera'];if(gh)for(let i=0;i<ghSlotsN();i++){const s=S.gh[i];if(s&&s.c&&s.p>=1&&invTotal()+2<=invCap())return {x:gh.x,z:gh.z+fpSize(gh)[1]+.8,anim:'PickUp_Table',dur:1.3,run:()=>{const c=s.c;const n=ghHarvest(i,true);if(n&&S.coins>=EXOTIC[c].cost){S.coins-=EXOTIC[c].cost;s.c=c;s.p=0;}refreshGH();return n>0;}};}}
+  if(id==='culegator'){for(let i=0;i<S.unl;i++){const p=S.plots[i];if(p.c&&p.p>=1&&free('p'+i)&&invTotal()+6<=invCap()){const [x,z]=plotPos(i);
+        // grab up to 3 more ripe plots next to it in one stop
+        const list=[i];for(let j=0;j<S.unl&&list.length<4;j++){if(j===i)continue;const q=S.plots[j];if(!q.c||q.p<1||!free('p'+j))continue;const [a,b]=plotPos(j);if(Math.hypot(a-x,b-z)<3.3)list.push(j);}
+        return {keys:list.map(j=>'p'+j),x,z:z+1.4,anim:'PickUp_Table',dur:1.1+.3*list.length,run:()=>{let ok=false;for(const j of list){const q=S.plots[j];const c=q.c;if(!c||q.p<1)continue;const n=harvestPlot(j,true);if(n>0){ok=true;plantPlot(j,CROPS[c].lv<=S.lv?c:'morcov');}else break;}return ok;}};}}
+    for(let i=0;i<S.unl;i++){const p=S.plots[i];if(!p.c&&p.last&&free('p'+i)&&S.coins>=CROPS[p.last].cost){const [x,z]=plotPos(i);return {keys:['p'+i],x,z:z+1.4,anim:'PickUp_Table',dur:1.2,run:()=>plantPlot(i,p.last)};}}}
+  if(id==='ingrijitor'){for(const o of animalObjs){if(o.a.rd&&free('a'+o.a.id)&&invTotal()+5<=invCap())return {keys:['a'+o.a.id],x:o.m.g.position.x+.8,z:o.m.g.position.z+.8,anim:'Interact',dur:1.1,run:()=>collectAnimal(o,true)>0};}
+    if(S.inv.hrana)for(let i=0;i<S.pens;i++)if(free('pen'+i)&&animalObjs.some(o=>o.pen===i&&!o.a.fed)){const [x,z]=penPos(i);return {keys:['pen'+i],x:x+4.4,z,anim:'Interact',dur:1.1,run:()=>feedPen(i)>0};}}
+  if(id==='vanzator'){if(!free('market'))return null;const need=orderNeeds();const sellable=Object.entries(S.inv).reduce((s,[k,n])=>s+(k==='hrana'?0:Math.max(0,n-(need[k]||0))),0);if(sellable>0&&(invTotal()>invCap()*.3||sellable>=15))return {keys:['market'],x:market.x,z:market.z+2.8,anim:'Interact',dur:1.4,run:()=>{const s=marketSell(true);if(s)toastQuiet(`🤖 Vânzătorul a vândut marfă: +${fmt(s)} 🪙`);return s>0;}};}
+  if(id==='fabricant'){for(const fid in FACTORIES){const st=S.fac[fid];const o=PL['f:'+fid];if(!st||!o||!free('f'+fid))continue;const canStart=st.last!==undefined&&st.q.length<slots()&&have(FACTORIES[fid].rec[st.last].need);
+      if((st.done.length&&invTotal()+st.done.length<=invCap())||canStart)return {keys:['f'+fid],x:o.x,z:o.z+fpSize(o)[1]+.8,anim:'Interact',dur:1.2,run:()=>{let ok=collectFactory(fid,true)>0;while(st.last!==undefined&&startRecipe(fid,st.last))ok=true;return ok;}};}}
+  if(id==='gradinar'){for(const k in S.trees){const tr=S.trees[k];const o=PL[k];if(o&&tr.p>=1&&free(k)&&invTotal()+3<=invCap())return {keys:[k],x:o.x,z:o.z+1.9,anim:'PickUp_Table',dur:1.3,run:()=>{if(tr.p<1)return false;addInv(tr.t,3);tr.p=0;S.st.harv++;return true;}};}
+    const gh=PL['b:sera'];if(gh)for(let i=0;i<ghSlotsN();i++){const s=S.gh[i];if(s&&s.c&&s.p>=1&&free('g'+i)&&invTotal()+2<=invCap())return {keys:['g'+i],x:gh.x+rand(-2,2),z:gh.z+fpSize(gh)[1]+.8,anim:'PickUp_Table',dur:1.3,run:()=>{const c=s.c;const n=ghHarvest(i,true);if(n&&S.coins>=EXOTIC[c].cost){S.coins-=EXOTIC[c].cost;s.c=c;s.p=0;}refreshGH();return n>0;}};}}
   return null;}
+function takeJob(id){const j=findJob(id);if(j)for(const k of j.keys)RES.add(k);return j;}
+function dropJob(j){if(j)for(const k of j.keys)RES.delete(k);}
 let quietT=-99;function toastQuiet(m){if(T-quietT>10){toast(m);quietT=T;}}
-function updateBots(dt){for(const id in bots){const b=bots[id];const on=workActive(id);b.t-=dt;
+function updateBots(dt){for(const key in bots){const b=bots[key],id=b.type;const on=workActive(id);b.t-=dt;
     if(Math.hypot(b.pos.x-player.pos.x,b.pos.z-player.pos.z)<120)b.mixer.update(dt);
-    if(b.lock>0){b.lock-=dt;if(b.lock<=0&&b.job){try{b.job.run();}catch(e){console.warn(e);}b.job=null;b.t=.5;hud();}continue;}
-    if(!on){botPlay(b,'Idle_Loop');continue;}
-    if(!b.job&&b.t<=0){b.job=findJob(id);if(!b.job){b.t=rand(3,5);const h=PL.casa;b.wx=h.x+rand(-6,6);b.wz=h.z+rand(5,9);}}
+    if(b.lock>0){b.lock-=dt;if(b.lock<=0&&b.job){try{b.job.run();}catch(e){console.warn(e);}dropJob(b.job);b.job=null;b.t=.3;hud();}continue;}
+    if(!on){if(b.job){dropJob(b.job);b.job=null;}botPlay(b,'Idle_Loop');continue;}
+    if(!b.job&&b.t<=0){b.job=takeJob(id);if(!b.job){b.t=rand(3,5);const h=PL.casa;b.wx=h.x+rand(-6,6);b.wz=h.z+rand(5,9);}}
     const tx=b.job?b.job.x:b.wx,tz=b.job?b.job.z:b.wz;if(tx===undefined){botPlay(b,'Idle_Loop');continue;}
     const dx=tx-b.pos.x,dz=tz-b.pos.z,d=Math.hypot(dx,dz);
     if(d>.9){const sp=3.6*dt;b.pos.x+=dx/d*Math.min(sp,d);b.pos.z+=dz/d*Math.min(sp,d);b.rot=angLerp(b.rot,Math.atan2(dx,dz),Math.min(1,dt*8));botPlay(b,'Walk_Loop');}
@@ -1135,7 +1148,7 @@ function updateBots(dt){for(const id in bots){const b=bots[id];const on=workActi
     else{botPlay(b,'Idle_Loop');b.wx=undefined;}
     b.pos.y=H(b.pos.x,b.pos.z);b.g.position.copy(b.pos);b.g.rotation.y=b.rot;}}
 let wageAcc=0;
-const wagesPerMin=()=>Object.entries(S.work).filter(([,x])=>x.on).reduce((s,[k])=>s+WORKERS[k].wage,0);
+const wagesPerMin=()=>Object.entries(S.work).filter(([,x])=>x.on).reduce((s,[k,x])=>s+WORKERS[k].wage*(x.n||1),0);
 function payWages(dt){const w=wagesPerMin();if(!w||S.coins<=0)return;wageAcc+=w*dt/60;if(wageAcc>=1){const c=Math.floor(wageAcc);wageAcc-=c;S.coins=Math.max(0,S.coins-c);if(S.coins<=0)toastQuiet('🤖 Boții nu mai au salariu — se odihnesc până faci bani');}}
 
 /* ================= ARRANGE MODE ================= */
@@ -1304,7 +1317,7 @@ const away=Math.min(12*3600,Math.max(0,(Date.now()-(S.last||Date.now()))/1000));
 let welcome=null;
 if(away>90){const pass0={...S.pass};const c0=S.coins;let rem=away;const res={grown:0,made:0,prods:0,jobs:0};
   while(rem>0){const st=Math.min(30,rem);const r=tickWorld(st,true);res.grown+=r.grown;res.made+=r.made;res.prods+=r.prods;
-    for(const id in S.work){if(!S.work[id].on||S.coins<=0)continue;S.coins=Math.max(0,S.coins-WORKERS[id].wage*st/60);for(let k=0;k<2;k++){const j=findJob(id);if(!j||!j.run())break;res.jobs++;}}
+    for(const id in S.work){if(!S.work[id].on||S.coins<=0)continue;const nW=workN(id);S.coins=Math.max(0,S.coins-WORKERS[id].wage*nW*st/60);for(let k=0;k<2*nW;k++){const j=findJob(id);if(!j||!j.run())break;res.jobs++;}}
     rem-=st;}
   S.coins=Math.round(S.coins);
   for(let i=0;i<maxPlots();i++)refreshPlot(i);refreshGH();

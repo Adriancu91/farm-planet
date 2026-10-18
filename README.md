@@ -9,7 +9,7 @@ Joacă aici: https://adriancu91.github.io/farm-planet/
 - 🌱 **8 legume** pe până la **96 de parcele** în 6 câmpuri; ferma se extinde pe **6 niveluri**.
 - 🌱 **Sera** — căpșuni, roșii, ardei, struguri, trandafiri, cacao pentru rețete scumpe.
 - 🏭 **8 fabrici**: furaje, brutărie, lăptărie, zahăr, țesătorie, cofetărie, bucătărie de pește, atelier de bijuterii.
-- 🤖 **Boți muncitori**: culegător, îngrijitor, vânzător, fabricant, grădinar — lucrează singuri (și cât nu joci), dar primesc salariu pe minut.
+- 🤖 **Boți muncitori** (până la 10 din fiecare fel, pe măsură ce crește ferma): culegător, îngrijitor, vânzător, fabricant, grădinar — își împart treaba, lucrează singuri (și cât nu joci), dar primesc salariu pe minut.
 - 💰 **Venituri pasive**: pușculiță, stand cu limonadă, pensiune, stupi cu miere (toate se pot îmbunătăți).
 - 🎯 **Misiuni**: 4 misiuni pe zi (+ ou de aur bonus) și 11 realizări cu câte 5 trepte.
 - 🥚 **Ouă misterioase** → 60% animal / 40% gol. **12 specii × 4 rarități** (comun, rar, epic, legendar) = **catalog de 48 de animale**. Slime și dragonii sunt mitici (doar din ouă de aur).
