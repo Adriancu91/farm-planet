@@ -103,6 +103,12 @@ p{margin:6px 0;line-height:1.3}
 .arranging #arrBar{display:flex}
 .arranging #joy,.arranging #quest,.arranging #jump,.arranging #act,.arranging #seeds,.arranging #veh,.arranging .side,.arranging .stats{display:none!important}
 .btns{display:grid!important;grid-template-columns:repeat(2,auto);gap:8px}
+.rbtn{position:relative}.dot{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:#ffd54f;border:2px solid #fff;display:none}.dot.on{display:block;animation:pulse 1s infinite alternate}
+@keyframes pulse{from{transform:scale(.8)}to{transform:scale(1.15)}}
+.bar2{height:10px;border-radius:6px;background:#eadfca;overflow:hidden;margin-top:3px}.bar2 i{display:block;height:100%;background:linear-gradient(90deg,#43b047,#8bd65a)}
+.rar{display:inline-block;font-size:11px;font-weight:800;color:#fff;border-radius:8px;padding:0 6px;margin-left:4px;vertical-align:middle}
+.coll div{position:relative;border:3px solid transparent}.coll div small{display:block;font-size:10px;font-weight:700;opacity:.8}
+.slot{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:74px;height:74px;margin:3px;border-radius:14px;background:var(--card);border:3px solid #fff;box-shadow:0 2px 0 rgba(0,0,0,.08);font-weight:800;font-size:12px;color:var(--ink);vertical-align:top}.slot span{font-size:28px}
 #play{margin-top:14px;border:5px solid #fff;border-radius:22px;background:var(--accent);color:#fff;font-weight:800;font-size:28px;padding:10px 34px;box-shadow:0 6px 0 rgba(0,0,0,.2);font-family:inherit;text-shadow:none}
 </style>
 </head>
@@ -124,6 +130,7 @@ p{margin:6px 0;line-height:1.3}
       <button class="rbtn" id="bBag" title="Hambar" style="background:#4caf50">🎒</button>
       <button class="rbtn" id="bArr" title="Aranjează ferma" style="background:#3fa9f5">🏗️</button>
       <button class="rbtn" id="bOrd" title="Comenzi" style="background:#e0a800">📋</button>
+      <button class="rbtn" id="bMis" title="Misiuni" style="background:#ef5350">🎯<i class="dot" id="misDot"></i></button>
     </div>
   </div>
   <div id="joy"><div id="knob"></div></div>

@@ -13,6 +13,7 @@ Toate modelele și texturile folosite sunt **CC0 (domeniu public)** — gratuite
 | Legume, nuferi, buștean | Kenney — Nature Kit | https://opengameart.org/content/nature-kit |
 | Dragon, Slimy, Liliac (companioni) | Quaternius — LowPoly Animated Monsters | https://opengameart.org/content/lowpoly-animated-monsters |
 | Tractor, mașină safari | Kenney — Car Kit | https://opengameart.org/content/car-kit |
+| Animații (mers, alergare, condus, dans…) și roboții muncitori | Quaternius — Universal Animation Library | https://opengameart.org/content/universal-animation-library |
 | Texturi de sol (iarbă, pământ, piatră, zăpadă) | Poly Haven | https://polyhaven.com |
 
 Modelele au fost micșorate și comprimate (texturi 512px, WebP, meshopt) ca jocul să se încarce repede pe telefon.
